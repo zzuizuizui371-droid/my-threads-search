@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threads Pro Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #a3a3a3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .glass-card { background: rgba(23, 23, 23, 0.6); border: 1px solid rgba(38, 38, 38, 0.5); backdrop-filter: blur(10px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-white/[0.03] blur-[100px] pointer-events-none"></div>
+
+    <main class="max-w-xl mx-auto pt-16">
+        <header class="mb-10 flex items-center justify-between">
+            <h1 class="text-xl font-medium tracking-tight text-white flex items-center gap-2">
+                <span class="bg-white text-black px-1.5 py-0.5 rounded text-sm font-black">@</span>
+                Threads <span class="text-neutral-600 font-light italic">DeepSearch</span>
+            </h1>
+            <span class="text-[10px] uppercase tracking-widest text-neutral-600">Updated Hourly</span>
+        </header>
+
+        <div id="results" class="space-y-4">
+            <div class="text-center py-20 text-neutral-700 animate-pulse">正在同步云端深度内容...</div>
+        </div>
+    </main>
+
+    <script>
+        // 自动读取同目录下的 data.json
+        async function loadThreads() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                const container = document.getElementById('results');
+                container.innerHTML = '';
+
+                data.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'p-5 glass-card rounded-3xl hover:border-neutral-700 transition-all duration-300 group';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-sm font-semibold text-neutral-200">@${item.title || 'Anonymous'}</span>
+                            <a href="${item.url}" target="_blank" class="text-neutral-600 hover:text-white transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </div>
+                        <div class="text-neutral-400 text-[15px] leading-relaxed mb-4">
+                            ${item.content || '无正文内容'}
+                        </div>
+                        <div class="flex items-center gap-2 text-[10px] text-neutral-600 tracking-tighter">
+                            <span>PROCESSED BY AI</span>
+                            <span>•</span>
+                            <span>${new Date(item.date).toLocaleString()}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (e) {
+                document.getElementById('results').innerHTML = '<div class="text-center text-red-900/50">数据尚未就绪，请等待 GitHub Actions 首次运行完成</div>';
+            }
+        }
+        loadThreads();
+    </script>
+</body>
+</html>
